@@ -1,8 +1,13 @@
+import {
+  oauthAvailable,
+  oauthUnavailableResponse,
+} from "@/capabilities/auth";
 import { github } from "@/auth";
 import { generateState } from "arctic";
 import { cookies } from "next/headers";
 
 export async function GET(): Promise<Response> {
+  if (!oauthAvailable()) return oauthUnavailableResponse();
   const state = generateState();
   const allCookies = await cookies();
   const url = await github.createAuthorizationURL(state, ["user:email"]);

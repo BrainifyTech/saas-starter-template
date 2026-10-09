@@ -40,3 +40,5 @@ yarn-error.log*
 local.db
 
 .source
+# mock storage (src/capabilities/storage.ts)
+/.data/

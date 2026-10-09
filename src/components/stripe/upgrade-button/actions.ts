@@ -7,6 +7,9 @@ import { stripe } from "@/lib/stripe";
 import { PublicError } from "@/use-cases/errors";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { isMock } from "@/capabilities";
+import { fakeSubscription } from "@/capabilities/payments";
+import { createSubscriptionUseCase } from "@/use-cases/subscriptions";
 
 const schema = z.object({
   priceId: z.union([
@@ -29,6 +32,13 @@ export const generateStripeSessionAction = authenticatedAction
 
     if (!userId) {
       throw new PublicError("no user id found");
+    }
+
+    if (isMock()) {
+      // No Stripe to confirm the payment: write what the webhook would have
+      // written and land where Stripe would have sent the person.
+      await createSubscriptionUseCase(fakeSubscription(userId, priceId));
+      redirect("/success");
     }
 
     const stripeSession = await stripe.checkout.sessions.create({

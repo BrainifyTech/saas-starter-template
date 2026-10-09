@@ -1,6 +1,9 @@
 import { Resend } from "resend";
+import { render } from "@react-email/components";
 
 import { env } from "@/env";
+import { isMock } from "@/capabilities";
+import { sendMockEmail } from "@/capabilities/email";
 import { ReactNode } from "react";
 
 const resend = new Resend(env.EMAIL_SERVER_PASSWORD);
@@ -10,6 +13,11 @@ export async function sendEmail(
   subject: string,
   body: ReactNode
 ) {
+  if (isMock()) {
+    await sendMockEmail({ to: email, subject, html: await render(<>{body}</>) });
+    return;
+  }
+
   const { error } = await resend.emails.send({
     from: env.EMAIL_FROM,
     to: email,

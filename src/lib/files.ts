@@ -1,4 +1,9 @@
 import { env } from "@/env";
+import { isMock } from "@/capabilities";
+import {
+  mockObjectUrl,
+  putMockObject,
+} from "@/capabilities/storage";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Upload } from "@aws-sdk/lib-storage";
@@ -14,6 +19,7 @@ const s3Client = new S3Client({
 });
 
 export async function getDownloadUrl(objectName: string) {
+  if (isMock()) return mockObjectUrl(objectName);
   return getSignedUrl(
     s3Client,
     new GetObjectCommand({
@@ -25,6 +31,14 @@ export async function getDownloadUrl(objectName: string) {
 }
 
 export async function uploadFileToBucket(file: File, filename: string) {
+  if (isMock()) {
+    await putMockObject(
+      filename,
+      new Uint8Array(await file.arrayBuffer()),
+      file.type
+    );
+    return;
+  }
   const Key = filename;
   const Bucket = env.CLOUDFLARE_BUCKET_NAME;
 
@@ -56,6 +70,11 @@ export async function getPresignedPostUrl(
   objectName: string,
   contentType: string
 ) {
+  if (isMock()) {
+    // Nothing in the app calls this today; a browser-direct upload needs a
+    // bucket that signs requests, which local disk cannot.
+    throw new Error("direct uploads need the live storage adapter (r2)");
+  }
   return await createPresignedPost(s3Client, {
     Bucket: env.CLOUDFLARE_BUCKET_NAME,
     Key: objectName,
@@ -72,6 +91,7 @@ export async function getPresignedPostUrl(
 }
 
 export async function getFileUrl({ key }: { key: string }) {
+  if (isMock()) return mockObjectUrl(key);
   const url = await getSignedUrl(
     s3Client,
     new GetObjectCommand({

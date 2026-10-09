@@ -1,8 +1,13 @@
+import {
+  oauthAvailable,
+  oauthUnavailableResponse,
+} from "@/capabilities/auth";
 import { googleAuth } from "@/auth";
 import { cookies } from "next/headers";
 import { generateCodeVerifier, generateState } from "arctic";
 
 export async function GET(): Promise<Response> {
+  if (!oauthAvailable()) return oauthUnavailableResponse();
   const state = generateState();
   const codeVerifier = generateCodeVerifier();
   const url = await googleAuth.createAuthorizationURL(state, codeVerifier, [
