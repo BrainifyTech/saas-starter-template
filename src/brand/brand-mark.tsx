@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 export function BrandMark({ className }: { className?: string }) {
   if (brand.logo) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
       <img src={brand.logo} alt={brand.productName} className={cn("h-8 w-auto", className)} />
     );
   }

@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run db:migrate && node --import tsx --test \"tests/**/*.test.ts\"",
+    "migrations:check": "node scripts/check-migration-heads.mjs",
     "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/webhooks/stripe",
     "db:push": "drizzle-kit push --config=drizzle.config.ts",
     "db:migrate": "tsx ./src/db/migrate.ts",
@@ -105,6 +108,6 @@
   },
   "engines": {
     "pnpm": ">=9.0.0 <10.0.0",
-    "node": ">=20.0.0 <21.0.0"
+    "node": ">=22.0.0 <23.0.0"
   }
 }
