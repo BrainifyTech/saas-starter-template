@@ -1,3 +1,58 @@
+# saas-starter-template
+
+This is the template behind RapidBuild's **saas-starter** preset: a Next.js 15
+SaaS on Drizzle and Postgres, with email, Google and GitHub sign-in, groups,
+Stripe subscriptions, and file uploads. It is
+[webdevcody/wdc-saas-starter-kit](https://github.com/webdevcody/wdc-saas-starter-kit)
+with that project's history kept, plus what a product built by agents needs
+before its first change:
+
+- `.rapidbuild.yml`, which states how to install, check and run it.
+- `AGENTS.md`, which says how to work in it. Read this first.
+- A test command, and CI that refuses a migration history with two heads or
+  a schema change without its migration.
+- Local mocks of every outside service, so it runs with nothing but a
+  Postgres (`src/capabilities/`).
+- One brand file with four slots (`brand/brand.json`).
+- `docker-compose.yml` with Postgres 16 and a mail-catcher, pinned by digest.
+- A Playwright e2e skeleton.
+- A Render deploy that a person starts by hand (`render.yaml`,
+  `.github/workflows/deploy.yml`).
+
+Quick start:
+
+```bash
+docker compose up -d
+npm ci --no-audit --no-fund --ignore-scripts && npm run postinstall
+export DATABASE_URL=postgresql://postgres:example@localhost:5432/postgres
+npm run test          # migrate, seed, test
+npm run dev           # http://localhost:3000, sign in as testing@example.com / 12345678
+```
+
+**Releases are tags on `main`, and `main` is the latest release.** GitHub's
+"generate from template" copies the default branch and takes no tag or
+commit, so `main` is never ahead of the newest tag. A preset names a tag and
+that tag's commit, and a repository generated from this template should
+start at exactly that commit. To release, commit to `main`, tag it `vX.Y.Z`
+on that same commit, and update the preset to the new tag and SHA.
+
+**A repository generated from this one can be empty for a few seconds.**
+GitHub answers the generate request before the files have been copied. A
+clone or a read made straight after can see an empty default branch, so
+wait for the first commit to appear before using the new repository.
+
+**Deploying needs three values, none of them in this repository.** Whoever
+owns the product's Render account sets them in the generated repository's
+Settings → Secrets and variables → Actions: the secret `RENDER_API_KEY`, and
+the variables `RENDER_STAGING_SERVICE_ID` and `RENDER_PRODUCTION_SERVICE_ID`.
+On RapidBuild, the platform copies the workspace's stored Render key in at
+Release. Provider keys for live mode go into Render (`sync: false` in
+`render.yaml`), never into this repository.
+
+The starter's own README follows.
+
+---
+
 Notice! this starter kit isn't fully finished, but I'm just making this public for now if anyone wants to add onto it. I'm getting burned out on working on this so I'm open to anyone wanting to help contribute to fixing up any bugs they find, etc.
 
 # Discord
