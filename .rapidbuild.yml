@@ -1,0 +1,33 @@
+# How RapidBuild builds, checks and runs this repository. Its runs read this
+# file before anything else, and a command declared here is the one they
+# verify a change with, in place of anything they would guess.
+#
+# The grammar is deliberately small: `key: value` on one line, or a key with
+# a `- item` list under it. A comment must be on its own line; text after a
+# value is read as part of the value.
+#
+# What "verify" means here: install, then lint, then test, each must exit 0
+# on the change as it did on the base. test needs a Postgres in DATABASE_URL
+# (it migrates first), so a run without the database capability fails it
+# loudly rather than skipping the part that needs one.
+
+# npm ci with scripts on: postinstall generates the MDX types (.source/)
+# that lint and typecheck read.
+install: npm ci --no-audit --no-fund
+
+# lint plus the type check: a change that breaks a caller's types (a new
+# required prop, a renamed export) fails here, not in production.
+lint: npm run lint && npm run typecheck
+
+test: npm test
+
+# The app runs on local mocks unless NEXT_PUBLIC_CAPABILITY_MODE=live, so
+# DATABASE_URL is the only value a preview needs. MAIL_CATCHER_URL, when set,
+# makes sign-in mail clickable.
+preview_command: npm run db:migrate && npm run dev
+preview_port: 3000
+
+# drizzle/migrate is the production image's migration runner, a separate
+# package with its own lockfile; nothing a run changes is built there.
+ignore:
+  - drizzle/migrate
