@@ -215,7 +215,6 @@ export const invites = pgTable("gf_invites", {
     .notNull()
     .default(sql`gen_random_uuid()`)
     .unique(),
-  tokenExpiresAt: timestamp("tokenExpiresAt", { mode: "date" }),
   groupId: serial("groupId")
     .notNull()
     .references(() => groups.id, { onDelete: "cascade" }),

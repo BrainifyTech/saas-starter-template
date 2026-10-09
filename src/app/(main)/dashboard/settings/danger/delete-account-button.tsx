@@ -30,7 +30,7 @@ import { deleteAccountAction } from "./actions";
 import { useServerAction } from "zsa-react";
 
 export const deleteSchema = z.object({
-  confirm: z.string().refine((v) => v === "Please delete", {
+  confirm: z.string().refine((v): boolean => v === "Please delete", {
     message: "Please type 'Please delete' to confirm",
   }),
 });
