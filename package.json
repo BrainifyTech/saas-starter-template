@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run db:migrate && node --import tsx --test \"tests/**/*.test.ts\"",
     "migrations:check": "node scripts/check-migration-heads.mjs",
+    "e2e": "playwright test",
     "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/webhooks/stripe",
     "db:push": "drizzle-kit push --config=drizzle.config.ts",
     "db:migrate": "tsx ./src/db/migrate.ts",
@@ -88,6 +89,7 @@
     "zsa-react": "0.2.3"
   },
   "devDependencies": {
+    "@playwright/test": "1.55.0",
     "@tailwindcss/typography": "0.5.15",
     "@types/canvas-confetti": "1.6.4",
     "@types/lodash": "4.17.13",

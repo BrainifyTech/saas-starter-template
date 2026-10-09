@@ -42,3 +42,8 @@ local.db
 .source
 # mock storage (src/capabilities/storage.ts)
 /.data/
+
+# playwright (e2e/)
+/test-results/
+/playwright-report/
+/blob-report/
