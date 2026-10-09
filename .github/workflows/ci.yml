@@ -40,14 +40,14 @@ jobs:
       # Refuses two heads (two migrations generated from the same parent, as
       # two stories on two branches produce), a sequence-numbered migration,
       # and a SQL file the journal does not list. Plain Node, no install.
-      - run: npm run migrations:check
+      - run: node scripts/check-migration-heads.mjs
 
   verify:
     name: Install, lint, typecheck, test, build
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+        image: postgres:16.15-alpine3.24@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
         env:
           POSTGRES_PASSWORD: example
         ports: ["5432:5432"]
@@ -60,9 +60,14 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci --no-audit --no-fund
+      # The install and setup a RapidBuild run uses (.rapidbuild.yml), so a
+      # green here and a green there mean the same thing.
+      - run: npm ci --no-audit --no-fund --ignore-scripts
+      - run: npm run postinstall --if-present
+      # drizzle-kit check, then the two-heads check.
+      - run: npm run db:check
+      # next lint, then tsc --noEmit.
       - run: npm run lint
-      - run: npm run typecheck
       # A schema change with no migration ships a table the database does not
       # have, and the first page that reads it answers 500. Generating must
       # produce nothing on a clean tree.
@@ -74,6 +79,8 @@ jobs:
             git status --porcelain drizzle
             exit 1
           fi
+      # Migrate, seed, then the suite, against this job's Postgres 16: the
+      # profile a run executes against its embedded Postgres 16.
       - run: npm test
       - run: npm run build
 
@@ -83,7 +90,7 @@ jobs:
     needs: verify
     services:
       postgres:
-        image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+        image: postgres:16.15-alpine3.24@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
         env:
           POSTGRES_PASSWORD: example
         ports: ["5432:5432"]
@@ -96,10 +103,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund --ignore-scripts
+      - run: npm run postinstall --if-present
       - run: npx playwright install --with-deps chromium
       - run: npm run db:migrate
-      - run: npm run e2e
+      - run: npm run test:e2e
         env:
           CI: "true"
       - if: failure()

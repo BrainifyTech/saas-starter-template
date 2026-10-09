@@ -1,5 +1,5 @@
 import { env } from "@/env";
-import { isMock } from "@/capabilities";
+import { storageAdapter } from "@/capabilities";
 import {
   mockObjectUrl,
   putMockObject,
@@ -19,7 +19,7 @@ const s3Client = new S3Client({
 });
 
 export async function getDownloadUrl(objectName: string) {
-  if (isMock()) return mockObjectUrl(objectName);
+  if (storageAdapter() === "local") return mockObjectUrl(objectName);
   return getSignedUrl(
     s3Client,
     new GetObjectCommand({
@@ -31,7 +31,7 @@ export async function getDownloadUrl(objectName: string) {
 }
 
 export async function uploadFileToBucket(file: File, filename: string) {
-  if (isMock()) {
+  if (storageAdapter() === "local") {
     await putMockObject(
       filename,
       new Uint8Array(await file.arrayBuffer()),
@@ -70,7 +70,7 @@ export async function getPresignedPostUrl(
   objectName: string,
   contentType: string
 ) {
-  if (isMock()) {
+  if (storageAdapter() === "local") {
     // Nothing in the app calls this today; a browser-direct upload needs a
     // bucket that signs requests, which local disk cannot.
     throw new Error("direct uploads need the live storage adapter (r2)");
@@ -91,7 +91,7 @@ export async function getPresignedPostUrl(
 }
 
 export async function getFileUrl({ key }: { key: string }) {
-  if (isMock()) return mockObjectUrl(key);
+  if (storageAdapter() === "local") return mockObjectUrl(key);
   const url = await getSignedUrl(
     s3Client,
     new GetObjectCommand({

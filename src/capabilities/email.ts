@@ -1,10 +1,14 @@
-// email: Resend live, the mail-catcher in mock mode.
+// email: Resend live; `log` or `smtp` otherwise (EMAIL_TRANSPORT).
 //
-// The mock keeps every message in an in-memory outbox (what a test reads) and,
-// when MAIL_CATCHER_URL is set, also posts it to the catcher's HTTP send API,
-// so a person trying the product can open a magic-link or verify-email
-// message and click it. Nothing in mock mode reaches a real mail provider.
+// log: the message goes to the server log and an in-memory outbox (what a
+// test reads). It is what a RapidBuild run uses, because a run has no mail
+// server and no egress to one.
+// smtp: the message goes to EMAIL_SERVER_HOST:EMAIL_SERVER_PORT, which
+// locally and in a preview is Mailpit from docker-compose.yml (1025), so a
+// person trying the product can open a magic link and click it.
+// Nothing but `resend` reaches a real mail provider.
 
+import nodemailer from "nodemailer";
 import { env } from "@/env";
 
 export type OutgoingEmail = {
@@ -25,36 +29,30 @@ export function clearMockOutbox(): void {
   outbox.length = 0;
 }
 
-// "Name <address>" or a bare address, as EMAIL_FROM is written.
-function parseFrom(from: string): { Email: string; Name?: string } {
-  const m = from.match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
-  return m ? { Name: m[1] || undefined, Email: m[2] } : { Email: from.trim() };
+export async function sendLoggedEmail(message: OutgoingEmail): Promise<void> {
+  outbox.push({ ...message, from: env.EMAIL_FROM, at: new Date() });
+  console.info(`[email:log] to=${message.to} subject=${JSON.stringify(message.subject)}`);
 }
 
-export async function sendMockEmail(message: OutgoingEmail): Promise<void> {
-  const sent: SentEmail = { ...message, from: env.EMAIL_FROM, at: new Date() };
-  outbox.push(sent);
-  console.info(`[email:mock] to=${message.to} subject=${JSON.stringify(message.subject)}`);
-
-  if (!env.MAIL_CATCHER_URL) return;
-  // Mailpit's send API. A catcher that is down is an error the caller sees,
-  // not a message quietly dropped: the sign-in flow depends on this mail.
-  const res = await fetch(new URL("/api/v1/send", env.MAIL_CATCHER_URL), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      From: parseFrom(env.EMAIL_FROM),
-      To: [{ Email: message.to }],
-      Subject: message.subject,
-      HTML: message.html,
-    }),
+export async function sendSmtpEmail(message: OutgoingEmail): Promise<void> {
+  const port = Number(env.EMAIL_SERVER_PORT);
+  const transport = nodemailer.createTransport({
+    host: env.EMAIL_SERVER_HOST,
+    port,
+    secure: port === 465,
+    auth: { user: env.EMAIL_SERVER_USER, pass: env.EMAIL_SERVER_PASSWORD },
   });
-  if (!res.ok) {
-    throw new Error(`mail-catcher refused the message: HTTP ${res.status}`);
-  }
+  // A catcher that is down is an error the caller sees, not a message quietly
+  // dropped: sign-in depends on this mail arriving.
+  await transport.sendMail({
+    from: env.EMAIL_FROM,
+    to: message.to,
+    subject: message.subject,
+    html: message.html,
+  });
 }
 
-// Newsletter contacts: Resend audiences live; remembered in memory in mock mode.
+// Newsletter contacts: Resend audiences live; remembered in memory otherwise.
 const mockContacts = new Set<string>();
 
 export function mockContactList(): string[] {

@@ -1,40 +1,59 @@
 // jobs: work that runs after the request that asked for it has returned.
 //
-// The starter has no background work and no queue service, so live and mock
-// are the same in-process runner. It exists so a story that needs "send this
-// later" has a declared place to put it; a story that needs durable jobs
-// (survive a restart, retry tomorrow) needs a real adapter, which is a new
-// service and so a question for the builder, not a change to this file.
+// pg-boss keeps the queue in the app's own Postgres (schema `pgboss`), so a
+// job survives a restart and adds no service: in a RapidBuild run it is the
+// run's embedded database, locally the compose Postgres, in production
+// Render's. The starter had no background work; this is the declared place
+// for it. A story that needs a different queue service is a new capability,
+// which is a question for the builder, not a change to this file.
 
-type Handler = (payload: unknown) => Promise<void> | void;
+import PgBoss from "pg-boss";
+import { env } from "@/env";
 
-const handlers = new Map<string, Handler>();
-const pending = new Set<Promise<void>>();
-let nextId = 1;
+let starting: Promise<PgBoss> | null = null;
 
-export function registerJob(name: string, handler: Handler): void {
-  handlers.set(name, handler);
+function boss(): Promise<PgBoss> {
+  if (!starting) {
+    const b = new PgBoss({ connectionString: env.DATABASE_URL, schema: "pgboss" });
+    b.on("error", (err) => console.error("[jobs]", err));
+    starting = b.start().then(() => b);
+  }
+  return starting;
 }
 
-export function enqueue(name: string, payload: unknown): string {
-  const handler = handlers.get(name);
-  if (!handler) {
-    throw new Error(`no job registered as ${JSON.stringify(name)}`);
-  }
-  const id = `job-${nextId++}`;
-  const run = new Promise<void>((resolve) => setImmediate(resolve))
-    .then(() => handler(payload))
-    .catch((err) => {
-      console.error(`[jobs] ${name} ${id} failed`, err);
-    })
-    .finally(() => pending.delete(run));
-  pending.add(run);
+// Queue a job. Returns its id.
+export async function enqueue(name: string, payload: object): Promise<string> {
+  const b = await boss();
+  await b.createQueue(name);
+  const id = await b.send(name, payload);
+  if (!id) throw new Error(`pg-boss did not accept a ${name} job`);
   return id;
 }
 
-// Wait for every job enqueued so far. Tests use it; so can a shutdown hook.
-export async function drain(): Promise<void> {
-  while (pending.size) {
-    await Promise.all([...pending]);
-  }
+// Run `handler` for every job queued under `name`, in this process.
+export async function work<T extends object>(
+  name: string,
+  handler: (payload: T) => Promise<void>
+): Promise<void> {
+  const b = await boss();
+  await b.createQueue(name);
+  await b.work<T>(name, async (jobs) => {
+    for (const job of jobs) await handler(job.data);
+  });
+}
+
+// Take one waiting job without a worker (tests, and draining by hand).
+export async function takeOne<T extends object>(name: string): Promise<{ id: string; data: T } | null> {
+  const b = await boss();
+  const [job] = await b.fetch<T>(name);
+  if (!job) return null;
+  await b.complete(name, job.id);
+  return { id: job.id, data: job.data };
+}
+
+export async function stopJobs(): Promise<void> {
+  if (!starting) return;
+  const b = await starting;
+  starting = null;
+  await b.stop({ graceful: false, wait: true });
 }

@@ -47,10 +47,16 @@ export const env = createEnv({
     CLOUDFLARE_ACCESS_KEY_ID: provider("mock-access-key"),
     CLOUDFLARE_SECRET_ACCESS_KEY: provider("mock-secret-key"),
     CLOUDFLARE_BUCKET_NAME: provider("mock-bucket"),
-    // Mock-only knobs. MAIL_CATCHER_URL is the mail-catcher's HTTP API (Mailpit
-    // in docker-compose.yml, http://localhost:8025); unset, mock mail is kept
-    // in memory and logged. MOCK_STORAGE_DIR is where mock uploads land.
-    MAIL_CATCHER_URL: z.string().url().optional(),
+    // One switch per capability that has a mock, the names the RapidBuild
+    // preset declares. Unset, each follows the capability mode: the mock in
+    // mock mode, the provider in live mode (src/capabilities).
+    //   EMAIL_TRANSPORT  resend | smtp | log   smtp reaches the mail-catcher
+    //   STORAGE_ADAPTER  r2 | local
+    //   PAYMENTS_ADAPTER stripe | fake
+    EMAIL_TRANSPORT: z.enum(["resend", "smtp", "log"]).optional(),
+    STORAGE_ADAPTER: z.enum(["r2", "local"]).optional(),
+    PAYMENTS_ADAPTER: z.enum(["stripe", "fake"]).optional(),
+    // Where STORAGE_ADAPTER=local keeps its files.
     MOCK_STORAGE_DIR: z.string().min(1).default(".data/storage"),
   },
   client: {
@@ -85,7 +91,9 @@ export const env = createEnv({
     CLOUDFLARE_SECRET_ACCESS_KEY: process.env.CLOUDFLARE_SECRET_ACCESS_KEY,
     CLOUDFLARE_BUCKET_NAME: process.env.CLOUDFLARE_BUCKET_NAME,
     RESEND_AUDIENCE_ID: process.env.RESEND_AUDIENCE_ID,
-    MAIL_CATCHER_URL: process.env.MAIL_CATCHER_URL,
+    EMAIL_TRANSPORT: process.env.EMAIL_TRANSPORT,
+    STORAGE_ADAPTER: process.env.STORAGE_ADAPTER,
+    PAYMENTS_ADAPTER: process.env.PAYMENTS_ADAPTER,
     MOCK_STORAGE_DIR: process.env.MOCK_STORAGE_DIR,
     NEXT_PUBLIC_CAPABILITY_MODE: process.env.NEXT_PUBLIC_CAPABILITY_MODE,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,

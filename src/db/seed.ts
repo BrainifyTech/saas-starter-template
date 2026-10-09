@@ -13,6 +13,15 @@ async function main() {
     .onConflictDoNothing()
     .returning();
 
+  // Already seeded: the insert above found the user and returned nothing. The
+  // starter crashed here on a second run (user is undefined), so a test
+  // profile that seeds could not run twice against one database.
+  if (!user) {
+    console.log("seed: testing@example.com exists already; nothing to do");
+    await pg.end();
+    return;
+  }
+
   const [account] = await database
     .insert(accounts)
     .values({
@@ -49,4 +58,8 @@ async function main() {
   await pg.end();
 }
 
-main();
+main().catch(async (err) => {
+  console.error(err);
+  await pg.end().catch(() => {});
+  process.exit(1);
+});

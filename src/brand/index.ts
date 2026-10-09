@@ -1,14 +1,14 @@
-// The product's brand: four slots in tokens.json, and nothing else a builder
-// sets.
+// The product's brand: four slots in brand/brand.json (repository root), and
+// nothing else a builder sets.
 //
 // RapidBuild asks the builder four plain questions (the brand sheet) and its
-// scaffold writes the answers into tokens.json; every screen reads them from
+// scaffold writes the answers into that file; every screen reads them from
 // here. The slots are:
 //
-//   productName   the product's name, shown in the header, titles and mail
+//   product_name  the product's name, shown in the header, titles and mail
 //   logo          a file under public/ (e.g. "/brand/logo.svg"), or null for
 //                 a wordmark rendered from the name
-//   primaryColor  one colour as #rrggbb; the light and dark palettes are
+//   primary_color one colour as #rrggbb; the light and dark palettes are
 //                 derived from it below, never asked for
 //   tone          one line describing how copy should sound, read by whoever
 //                 writes the product's words
@@ -18,9 +18,9 @@
 // is a question a non-designer cannot answer well. Adding a slot is a change
 // to this template and to the preset, not to one product.
 
-import tokens from "./tokens.json";
+import tokens from "../../brand/brand.json";
 
-export const BRAND_SLOTS = ["productName", "logo", "primaryColor", "tone"] as const;
+export const BRAND_SLOTS = ["product_name", "logo", "primary_color", "tone"] as const;
 
 export type Brand = {
   productName: string;
@@ -41,22 +41,22 @@ export function parseBrand(raw: unknown): Brand {
     );
   }
   const b = raw as Record<string, unknown>;
-  if (typeof b.productName !== "string" || !b.productName.trim()) {
-    throw new Error("productName must be a non-empty string");
+  if (typeof b.product_name !== "string" || !b.product_name.trim()) {
+    throw new Error("product_name must be a non-empty string");
   }
   if (b.logo !== null && (typeof b.logo !== "string" || !b.logo.startsWith("/"))) {
     throw new Error("logo must be null or a path under public/ starting with /");
   }
-  if (typeof b.primaryColor !== "string" || !/^#[0-9a-fA-F]{6}$/.test(b.primaryColor)) {
-    throw new Error("primaryColor must be #rrggbb");
+  if (typeof b.primary_color !== "string" || !/^#[0-9a-fA-F]{6}$/.test(b.primary_color)) {
+    throw new Error("primary_color must be #rrggbb");
   }
   if (typeof b.tone !== "string") {
     throw new Error("tone must be a string");
   }
   return {
-    productName: b.productName.trim(),
+    productName: b.product_name.trim(),
     logo: b.logo as string | null,
-    primaryColor: b.primaryColor.toLowerCase(),
+    primaryColor: b.primary_color.toLowerCase(),
     tone: b.tone.trim(),
   };
 }

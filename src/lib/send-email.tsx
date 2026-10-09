@@ -2,8 +2,8 @@ import { Resend } from "resend";
 import { render } from "@react-email/components";
 
 import { env } from "@/env";
-import { isMock } from "@/capabilities";
-import { sendMockEmail } from "@/capabilities/email";
+import { emailTransport } from "@/capabilities";
+import { sendLoggedEmail, sendSmtpEmail } from "@/capabilities/email";
 import { ReactNode } from "react";
 
 const resend = new Resend(env.EMAIL_SERVER_PASSWORD);
@@ -13,8 +13,10 @@ export async function sendEmail(
   subject: string,
   body: ReactNode
 ) {
-  if (isMock()) {
-    await sendMockEmail({ to: email, subject, html: await render(<>{body}</>) });
+  const transport = emailTransport();
+  if (transport !== "resend") {
+    const message = { to: email, subject, html: await render(<>{body}</>) };
+    await (transport === "smtp" ? sendSmtpEmail(message) : sendLoggedEmail(message));
     return;
   }
 

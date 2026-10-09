@@ -7,7 +7,7 @@ import { stripe } from "@/lib/stripe";
 import { PublicError } from "@/use-cases/errors";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { isMock } from "@/capabilities";
+import { paymentsAdapter } from "@/capabilities";
 import { fakeSubscription } from "@/capabilities/payments";
 import { createSubscriptionUseCase } from "@/use-cases/subscriptions";
 
@@ -34,7 +34,7 @@ export const generateStripeSessionAction = authenticatedAction
       throw new PublicError("no user id found");
     }
 
-    if (isMock()) {
+    if (paymentsAdapter() === "fake") {
       // No Stripe to confirm the payment: write what the webhook would have
       // written and land where Stripe would have sent the person.
       await createSubscriptionUseCase(fakeSubscription(userId, priceId));

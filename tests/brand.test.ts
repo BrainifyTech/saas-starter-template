@@ -1,16 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { BRAND_SLOTS, brand, brandCss, derivePalettes, parseBrand } from "@/brand";
-import tokens from "@/brand/tokens.json";
+import tokens from "../brand/brand.json";
 
-test("the token file has the four brand slots and no others", () => {
-  assert.deepEqual(Object.keys(tokens).sort(), [...BRAND_SLOTS].sort());
+test("brand/brand.json has the four brand slots and no others", () => {
+  assert.deepEqual(Object.keys(tokens).sort(), ["logo", "primary_color", "product_name", "tone"]);
+  assert.deepEqual([...BRAND_SLOTS].sort(), Object.keys(tokens).sort());
   assert.equal(brand.productName.length > 0, true);
 });
 
 test("a fifth slot is refused, not ignored", () => {
-  assert.throws(() => parseBrand({ ...tokens, secondaryColor: "#000000" }), /exactly/);
-  assert.throws(() => parseBrand({ ...tokens, primaryColor: "indigo" }), /#rrggbb/);
+  assert.throws(() => parseBrand({ ...tokens, secondary_color: "#000000" }), /exactly/);
+  assert.throws(() => parseBrand({ ...tokens, primary_color: "indigo" }), /#rrggbb/);
   assert.throws(() => parseBrand({ ...tokens, logo: "logo.svg" }), /public/);
 });
 

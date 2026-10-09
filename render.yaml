@@ -1,17 +1,87 @@
-# Render Blueprint: the production shape of this product. One web service and
-# one managed Postgres, in one Render account.
+# Render Blueprint: the product's two environments, staging and production,
+# each one Node web service and one managed Postgres 16, in one Render
+# account.
 #
 # Deploys happen only when a person presses "Run workflow" on the Deploy
-# workflow (.github/workflows/deploy.yml), never on push: autoDeploy is off.
-# Render runs the migrations itself (preDeployCommand) before it swaps the new
-# version in; nothing outside the repository's own pipeline touches the
-# production database.
+# workflow (.github/workflows/deploy.yml) and picks an environment, never on
+# push: autoDeploy is off. Render runs the migrations itself
+# (preDeployCommand) before it swaps the new version in; nothing outside the
+# repository's own pipeline touches either database.
 #
-# Values marked `sync: false` are entered once in Render's dashboard (or by
-# whoever holds them) and are never committed. In live mode every one of them
-# is required; the app refuses to start without them (src/env.ts).
+# Values marked `sync: false` are entered once in Render's dashboard by
+# whoever holds them, staging with test keys and production with live ones,
+# and are never committed. Both environments run live adapters, so every one
+# of them is required; the app refuses to start without them (src/env.ts).
+# `npm ci` here keeps dependency scripts on because Render builds from a
+# clean machine and the MDX types (postinstall) are part of the build.
 
 services:
+  - type: web
+    name: saas-starter-staging
+    runtime: node
+    plan: starter
+    autoDeploy: false
+    buildCommand: npm ci --no-audit --no-fund && npm run build
+    preDeployCommand: npm run db:migrate
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_CAPABILITY_MODE
+        value: live
+      - key: DATABASE_URL
+        fromDatabase:
+          name: saas-starter-staging-db
+          property: connectionString
+      - key: HOST_NAME
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: STRIPE_API_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: EMAIL_SERVER_HOST
+        sync: false
+      - key: EMAIL_SERVER_PORT
+        sync: false
+      - key: EMAIL_SERVER_USER
+        sync: false
+      - key: EMAIL_SERVER_PASSWORD
+        sync: false
+      - key: RESEND_AUDIENCE_ID
+        sync: false
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_ACCESS_KEY_ID
+        sync: false
+      - key: CLOUDFLARE_SECRET_ACCESS_KEY
+        sync: false
+      - key: CLOUDFLARE_BUCKET_NAME
+        sync: false
+      - key: NEXT_PUBLIC_STRIPE_KEY
+        sync: false
+      - key: NEXT_PUBLIC_STRIPE_MANAGE_URL
+        sync: false
+      - key: NEXT_PUBLIC_PRICE_ID_BASIC
+        sync: false
+      - key: NEXT_PUBLIC_PRICE_ID_PREMIUM
+        sync: false
+      - key: NEXT_PUBLIC_POSTHOG_KEY
+        sync: false
+      - key: NEXT_PUBLIC_POSTHOG_HOST
+        sync: false
   - type: web
     name: saas-starter
     runtime: node
@@ -80,6 +150,9 @@ services:
         sync: false
 
 databases:
+  - name: saas-starter-staging-db
+    plan: basic-256mb
+    postgresMajorVersion: "16"
   - name: saas-starter-db
     plan: basic-256mb
     postgresMajorVersion: "16"

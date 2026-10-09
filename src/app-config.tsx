@@ -7,7 +7,7 @@ export const appConfig: {
 };
 
 export const protectedRoutes = ["/purchases", "/dashboard"];
-// The name comes from the brand tokens (src/brand/tokens.json), the one place a
+// The name comes from the brand tokens (brand/brand.json), the one place a
 // product sets it.
 export const applicationName = brand.productName;
 export const companyName = "Groupie, LLC";

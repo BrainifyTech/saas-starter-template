@@ -1,13 +1,13 @@
 import { Resend } from "resend";
 
 import { env } from "@/env";
-import { isMock } from "@/capabilities";
+import { emailTransport } from "@/capabilities";
 import { addMockContact } from "@/capabilities/email";
 
 const resend = new Resend(env.EMAIL_SERVER_PASSWORD);
 
 export async function subscribeEmail(email: string) {
-  if (isMock()) {
+  if (emailTransport() !== "resend") {
     await addMockContact(email);
     return;
   }

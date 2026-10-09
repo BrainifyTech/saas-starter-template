@@ -1,4 +1,4 @@
-import { isMock } from "@/capabilities";
+import { storageAdapter } from "@/capabilities";
 import { readMockObject } from "@/capabilities/storage";
 
 // Serves files the storage mock wrote to local disk. In live mode files are
@@ -7,7 +7,7 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ key: string[] }> }
 ): Promise<Response> {
-  if (!isMock()) return new Response("Not found", { status: 404 });
+  if (storageAdapter() !== "local") return new Response("Not found", { status: 404 });
   const { key } = await params;
   let object;
   try {
