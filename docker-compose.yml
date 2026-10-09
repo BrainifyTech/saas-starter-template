@@ -1,16 +1,55 @@
-version: "3.9"
+# The services this product runs beside, in the shape a preview and
+# production have: a real Postgres and a mail-catcher.
+#
+#   docker compose up -d
+#   DATABASE_URL=postgresql://postgres:example@localhost:5432/postgres \
+#   MAIL_CATCHER_URL=http://localhost:8025 npm run dev
+#
+# Mail sent in mock mode (src/capabilities/email.ts) appears at
+# http://localhost:8025, so a sign-in link can be clicked. Production uses
+# the hosting provider's managed Postgres (render.yaml) and a real mail
+# provider; neither service here is deployed.
+#
+# Images are pinned by digest, not by tag: a tag can be re-pointed under a
+# repository that has not changed, and "the preview worked yesterday" has to
+# mean the same images today. The tag beside each digest is for the reader;
+# the digest is what is pulled. To move one, resolve the new tag's index
+# digest (`docker buildx imagetools inspect <image:tag>`) and change both.
+#
+# No container_name: two checkouts (or a preview beside a developer) can run
+# this file at once under different project names.
+
 services:
-  wdc-saas-starter-kit:
-    image: postgres
-    restart: always
-    container_name: wdc-saas-starter-kit
-    ports:
-      - 5432:5432
+  postgres:
+    image: postgres:16-alpine@sha256:721873c34ceb9f8d8fc265984940dc982404c105f19ad51be9fdc5970a6080ea
+    restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: example
       PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
     volumes:
       - postgres:/data/postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:v1.27@sha256:e22dce5b36f93c77082e204a3942fb6b283b7896e057458400a4c88344c3df68
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
 
 volumes:
   postgres:
