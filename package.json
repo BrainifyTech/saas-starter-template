@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint && tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "npm run db:migrate && npm run db:seed && node --import tsx --test \"tests/**/*.test.ts\"",
+    "test": "npm run db:migrate && npm run db:seed && npx tsx rb-db-smoke.ts && node --import tsx --test \"tests/**/*.test.ts\"",
     "test:e2e": "playwright test",
     "db:check": "drizzle-kit check --config=drizzle.config.ts && node scripts/check-migration-heads.mjs",
     "stripe:listen": "stripe listen --forward-to http://localhost:3000/api/webhooks/stripe",

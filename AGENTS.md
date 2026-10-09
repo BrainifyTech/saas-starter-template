@@ -14,7 +14,7 @@ repository root.
 | install | `npm ci --no-audit --no-fund --ignore-scripts` | dependency scripts stay off |
 | setup | `npm run postinstall --if-present` | writes `.source/` (the MDX types lint reads); run once after install |
 | lint | `npm run lint` | `next lint`, then `tsc --noEmit`; both must be clean |
-| test | `npm run test` | migrates and seeds `DATABASE_URL`, then runs `tests/**/*.test.ts` with node:test through tsx |
+| test | `npm run test` | migrates and seeds `DATABASE_URL`, runs `rb-db-smoke.ts` (a record saved and found again), then `tests/**/*.test.ts` with node:test through tsx. The preset's test command is its first three steps: `npm run db:migrate && npm run db:seed && npx tsx rb-db-smoke.ts` |
 | browser suite | `npm run test:e2e` | Playwright, `e2e/`; starts `npm run dev` itself, or set `E2E_BASE_URL` to drive a running app |
 | build | `npm run build` | `next build` |
 | start | `npm run dev` | port 3000 |

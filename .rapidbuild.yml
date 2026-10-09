@@ -25,7 +25,10 @@ setup: npm run postinstall --if-present
 # (a new required prop, a renamed export) fails here, not in production.
 lint: npm run lint
 
-test: npm run test
+# The preset's test command: migrate, seed, and a record saved and found
+# again through the app's own data-access functions (rb-db-smoke.ts).
+# `npm run test` starts with exactly this and then runs the rest of tests/.
+test: npm run db:migrate && npm run db:seed && npx tsx rb-db-smoke.ts
 
 # Every capability but the database runs on its local mock unless
 # NEXT_PUBLIC_CAPABILITY_MODE=live, so DATABASE_URL is the only value a
