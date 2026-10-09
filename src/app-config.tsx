@@ -1,3 +1,5 @@
+import { brand } from "@/brand";
+
 export const appConfig: {
   mode: "comingSoon" | "maintenance" | "live";
 } = {
@@ -5,7 +7,9 @@ export const appConfig: {
 };
 
 export const protectedRoutes = ["/purchases", "/dashboard"];
-export const applicationName = "Group Finder";
+// The name comes from the brand tokens (src/brand/tokens.json), the one place a
+// product sets it.
+export const applicationName = brand.productName;
 export const companyName = "Groupie, LLC";
 
 export const MAX_UPLOAD_IMAGE_SIZE_IN_MB = 5;

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { HeaderLinks } from "@/app/(main)/_header/header-links";
 import { Suspense } from "react";
 import { getCurrentUser } from "@/lib/session";
@@ -14,6 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Settings2Icon } from "lucide-react";
 import { HeaderActionsFallback } from "@/app/(main)/_header/header-actions-fallback";
 import { applicationName } from "@/app-config";
+import { BrandMark } from "@/brand/brand-mark";
 import { SignOutItem } from "@/app/(main)/_header/sign-out-item";
 import {
   getUnreadNotificationsForUserUseCase,
@@ -31,16 +31,7 @@ export async function Header() {
       <div className="mx-auto flex w-full max-w-7xl py-4 justify-between">
         <div className="flex justify-between gap-10 items-center">
           <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/group.jpeg"
-              alt="Group Finder Logo"
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-            <span className="text-sm md:text-base lg:text-2xl font-bold text-foreground">
-              {applicationName}
-            </span>
+            <BrandMark className="text-sm md:text-base lg:text-2xl" />
           </Link>
 
           <HeaderLinks isAuthenticated={!!user} />

@@ -11,6 +11,7 @@ import PostHogPageView from "@/components/posthog-page-view";
 import { Archivo } from "next/font/google";
 import { Libre_Franklin } from "next/font/google";
 import { BreakpointOverlay } from "@/components/breakpoint-overlay";
+import { brandCss } from "@/brand";
 
 const archivo = Archivo({
   subsets: ["latin"],
@@ -63,6 +64,10 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* The brand's primary colour, light and dark, over globals.css. */}
+        <style dangerouslySetInnerHTML={{ __html: brandCss() }} />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background antialiased",
