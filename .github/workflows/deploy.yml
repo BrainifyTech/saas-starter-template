@@ -1,0 +1,101 @@
+# Deploy to Render. Runs only when a person presses "Run workflow" (Actions →
+# Deploy), and only from main.
+#
+# Why a button and not a push trigger: releasing is a decision a person makes
+# after reading what is going out, and the repository's own CI is the only
+# thing that ever deploys it. No other system holds a production shell or
+# runs a migration against production; Render runs `npm run db:migrate` as
+# the service's preDeployCommand (render.yaml).
+#
+# What it needs, set once by whoever owns the Render account (in RapidBuild,
+# the platform mirrors the workspace's stored Render key here):
+#   secret   RENDER_API_KEY     a Render API key (Account settings → API keys)
+#   variable RENDER_SERVICE_ID  the web service's id, srv-…, from its URL
+# Neither is committed. Without them the workflow stops at its first step and
+# says which one is missing.
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy main to Render
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment: production
+    steps:
+      - name: Only main is released
+        if: github.ref != 'refs/heads/main'
+        run: |
+          echo "::error::Deploy runs from main only; this was started on ${GITHUB_REF}"
+          exit 1
+
+      - name: Credentials are set
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_ID }}
+        run: |
+          missing=""
+          [ -n "$RENDER_API_KEY" ] || missing="$missing secret RENDER_API_KEY;"
+          [ -n "$RENDER_SERVICE_ID" ] || missing="$missing variable RENDER_SERVICE_ID;"
+          if [ -n "$missing" ]; then
+            echo "::error::Not set in this repository:$missing see the comment at the top of deploy.yml"
+            exit 1
+          fi
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+      # The same refusal CI makes, repeated here so a forked migration history
+      # can never be released even if CI was skipped.
+      - run: npm run migrations:check
+
+      - name: Start the deploy of this commit
+        id: start
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_ID }}
+        run: |
+          body=$(jq -n --arg sha "$GITHUB_SHA" '{clearCache: "do_not_clear", commitId: $sha}')
+          resp=$(curl -sS --fail-with-body -X POST \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$body" \
+            "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys")
+          id=$(echo "$resp" | jq -r .id)
+          if [ -z "$id" ] || [ "$id" = "null" ]; then
+            echo "::error::Render did not start a deploy: $resp"
+            exit 1
+          fi
+          echo "Deploy $id started for $GITHUB_SHA"
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for it to go live
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_ID }}
+          DEPLOY_ID: ${{ steps.start.outputs.id }}
+        run: |
+          while true; do
+            status=$(curl -sS --fail-with-body \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys/$DEPLOY_ID" | jq -r .status)
+            echo "$(date -u +%H:%M:%S) $status"
+            case "$status" in
+              live) echo "Released $GITHUB_SHA"; exit 0 ;;
+              build_failed|update_failed|pre_deploy_failed|canceled|deactivated)
+                echo "::error::Deploy $DEPLOY_ID ended $status; the previous version is still serving"
+                exit 1 ;;
+            esac
+            sleep 15
+          done
