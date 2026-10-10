@@ -1,6 +1,6 @@
 import { env } from "@/env";
 import { rateLimitByKey } from "@/lib/limiter";
-import { assertAuthenticated } from "@/lib/session";
+import { assertAuthenticatedOrThrow } from "@/lib/session";
 import { PublicError } from "@/use-cases/errors";
 import { createServerActionProcedure } from "zsa";
 
@@ -27,7 +27,7 @@ function shapeErrors({ err }: any) {
 export const authenticatedAction = createServerActionProcedure()
   .experimental_shapeError(shapeErrors)
   .handler(async () => {
-    const user = await assertAuthenticated();
+    const user = await assertAuthenticatedOrThrow();
     await rateLimitByKey({
       key: `${user.id}-global`,
       limit: 10,

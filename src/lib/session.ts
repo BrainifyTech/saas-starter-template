@@ -3,6 +3,7 @@ import { AuthenticationError } from "@/app/(main)/util";
 import { createSession, generateSessionToken, validateRequest } from "@/auth";
 import { cache } from "react";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { UserId } from "@/use-cases/types";
 
 const SESSION_COOKIE_NAME = "session";
@@ -43,7 +44,28 @@ export const getCurrentUser = cache(async () => {
   return user ?? undefined;
 });
 
+// A signed-in page awaits this first. A visitor nobody signed in is sent to
+// sign-in (307) instead of the page throwing: the starter threw, so every
+// signed-in page answered that visitor 500 (RapidBuild GF-37 walk, A7, on a
+// product's /dashboard/notes).
+//
+// The check stays in each page, not in src/middleware.ts or a layout.
+// Middleware runs before routing, so an unknown URL under /dashboard would be
+// sent to sign-in too instead of answering 404, and a layout runs for every
+// URL a catch-all segment below it takes (dashboard/groups/[groupId]/
+// [...not-found]). Either way a page that does not exist would look, from
+// outside, like one behind sign-in.
 export const assertAuthenticated = async () => {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/sign-in");
+  }
+  return user;
+};
+
+// For a server action, which has no page to leave: its caller gets the
+// action's error, as it always did.
+export const assertAuthenticatedOrThrow = async () => {
   const user = await getCurrentUser();
   if (!user) {
     throw new AuthenticationError();

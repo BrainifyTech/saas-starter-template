@@ -110,6 +110,11 @@ write copy, follow `tone`.
   and new code should not.
 - Server actions sit beside their page in `actions.ts`, built on
   `src/lib/safe-action.ts`.
+- A signed-in page starts with `await assertAuthenticated()`
+  (`src/lib/session.ts`), which sends a visitor nobody signed in to
+  `/sign-in`. Keep that check in the page, not in a layout or
+  `src/middleware.ts`: a URL nothing serves must stay a 404, or a missing
+  page and a page behind sign-in look the same from outside.
 - Environment: `src/env.ts` validates every variable at import.
   `.env.sample` lists them. Never commit `.env`.
 - Tests: `tests/` (unit and database, `npm run test`) and `e2e/` (browser,
