@@ -1,4 +1,5 @@
 import Container from "@/components/container";
+import { applicationName } from "@/app-config";
 import { Heart, MessageSquare, Calendar, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,7 @@ export function TheProblemSection() {
             </h2>
             <p className="text-xl text-neutral-600 dark:text-neutral-400 mb-8 leading-relaxed">
               We've all been there. You want to connect, but the tools get in the way. 
-              Group Finder strips away the noise and gives you the dedicated space you need.
+              {applicationName} strips away the noise and gives you the dedicated space you need.
             </p>
             <div className="h-1 w-20 bg-brand-primary rounded-full mb-12" />
             
@@ -83,7 +84,7 @@ export function TheProblemSection() {
 
                 <div className="flex justify-center">
                    <div className="px-6 py-3 rounded-full bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 font-semibold shadow-lg flex items-center gap-2">
-                     The Group Finder Way <ArrowRight className="w-4 h-4" />
+                     The {applicationName} Way <ArrowRight className="w-4 h-4" />
                    </div>
                 </div>
               </CardContent>

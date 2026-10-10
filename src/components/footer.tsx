@@ -1,4 +1,4 @@
-import { applicationName, companyName } from "@/app-config";
+import { applicationName } from "@/app-config";
 import Link from "next/link";
 import { ModeToggle } from "@/components/mode-toggle";
 
@@ -17,13 +17,6 @@ export function Footer() {
               <h3 className="mb-6 text-sm font-semibold text-neutral-900 uppercase dark:text-foreground">
                 Help center
               </h3>
-              <ul className="text-neutral-500 dark:text-neutral-400">
-                <li className="mb-4">
-                  <a href="#" className="hover:underline">
-                    Twitter
-                  </a>
-                </li>
-              </ul>
             </div>
             <div>
               <h3 className="mb-6 text-sm font-semibold text-neutral-900 uppercase dark:text-foreground">
@@ -51,8 +44,7 @@ export function Footer() {
       <footer className="py-8 px-5 border-t">
         <div className="text-center">
           <span className="block text-sm text-center text-neutral-500 dark:text-neutral-400">
-            © 2024 <Link href="/">{applicationName}</Link>. All Rights Reserved.
-            Built with ❤️ by {companyName}
+            © {new Date().getFullYear()} <Link href="/">{applicationName}</Link>
           </span>
         </div>
       </footer>

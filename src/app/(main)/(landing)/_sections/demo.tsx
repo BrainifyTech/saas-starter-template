@@ -1,4 +1,6 @@
 import Container from "@/components/container";
+import { applicationName } from "@/app-config";
+import { env } from "@/env";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -15,7 +17,7 @@ export function DemoSection() {
             Experience the Platform
           </h2>
           <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
-            Take a quick tour of the features that make Group Finder the best place to build communities.
+            Take a quick tour of the features that make {applicationName} the best place to build communities.
           </p>
         </div>
 
@@ -30,7 +32,7 @@ export function DemoSection() {
               </div>
               <div className="flex-1 text-center">
                 <div className="inline-block px-3 py-1 rounded-md bg-black/20 text-xs text-neutral-400 font-mono">
-                  groupfinder.app/demo
+                  {new URL(env.HOST_NAME).host}/demo
                 </div>
               </div>
               <div className="w-12" /> {/* Spacer for balance */}

@@ -62,7 +62,7 @@ export function NewsletterForm() {
             <Terminal className="h-4 w-4" />
             <AlertTitle>Successfully subscribed</AlertTitle>
             <AlertDescription>
-              We&apos;ll let you know when this starter kit is ready!
+              We&apos;ll let you know when we launch!
             </AlertDescription>
           </Alert>
         )}

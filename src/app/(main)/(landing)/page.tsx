@@ -8,7 +8,6 @@ import { NewsletterSection } from "@/app/(main)/(landing)/_sections/newsletter";
 import { PricingSection } from "@/app/(main)/(landing)/_sections/pricing";
 import { ShowcaseSection } from "@/app/(main)/(landing)/_sections/showcase";
 import { StackSection } from "@/app/(main)/(landing)/_sections/stack";
-import { TestimonalsSection } from "@/app/(main)/(landing)/_sections/testimonals";
 import { TheProblemSection } from "@/app/(main)/(landing)/_sections/the-problem";
 
 import { appConfig } from "@/app-config";
@@ -43,7 +42,6 @@ export default async function Home() {
         <StackSection />
         <DemoSection />
         <ShowcaseSection />
-        <TestimonalsSection />
         <PricingSection hasSubscription={hasSubscription} />
         <FaqSection />
         <NewsletterSection />

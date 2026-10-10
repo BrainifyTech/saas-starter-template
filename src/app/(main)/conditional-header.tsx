@@ -14,10 +14,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { LogOut, Settings2Icon } from "lucide-react";
 
-import Image from "next/image";
 import { ModeToggle } from "@/components/mode-toggle";
 import Link from "next/link";
-import { applicationName } from "@/app-config";
+import { BrandMark } from "@/brand/brand-mark";
 import { Button } from "@/components/ui/button";
 import { type Session } from "@/db/schema";
 
@@ -37,14 +36,7 @@ export function ConditionalHeader({
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex gap-8 items-center">
           <Link href="/" className="flex gap-2 items-center text-xl">
-            <Image
-              className="rounded w-8 h-8"
-              width="50"
-              height="50"
-              src="/group.jpeg"
-              alt="hero image"
-            />
-            {applicationName}
+            <BrandMark />
           </Link>
 
           {isDashboard && (

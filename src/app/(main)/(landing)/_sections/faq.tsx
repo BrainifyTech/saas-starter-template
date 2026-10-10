@@ -4,6 +4,7 @@ import Container from "@/components/container";
 import { useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { applicationName } from "@/app-config";
 
 export function FaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -15,7 +16,7 @@ export function FaqSection() {
         "Simply browse our groups page, find a community that interests you, and click 'Join Group'. Most groups are open to everyone, though some may require approval from the group admin.",
     },
     {
-      question: "Is Group Finder free to use?",
+      question: `Is ${applicationName} free to use?`,
       answer:
         "Yes! We offer a free Starter plan that lets you join unlimited groups and create up to 3 groups of your own. If you want to create more groups or access advanced features, we offer affordable paid plans.",
     },

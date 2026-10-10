@@ -49,21 +49,18 @@ On RapidBuild, the platform copies the workspace's stored Render key in at
 Release. Provider keys for live mode go into Render (`sync: false` in
 `render.yaml`), never into this repository.
 
-The starter's own README follows.
+**A product's names come from the brand file; its addresses come from
+where it is deployed.** `brand/brand.json` holds the four brand slots
+(`product_name`, `logo`, `primary_color`, `tone`), and the product's name
+also stands in for the company's (the copyright line, the privacy page).
+Addresses are set per deployment: `HOST_NAME` (the site's URL, used in links,
+emails and the sitemap), `EMAIL_FROM` (the sender address; the name in front
+of it is `product_name`) and the optional `CONTACT_EMAIL` (the privacy page's
+contact, the sender's address when unset). `.env.sample` lists them.
+
+The starter's own README follows, without its author's announcements.
 
 ---
-
-Notice! this starter kit isn't fully finished, but I'm just making this public for now if anyone wants to add onto it. I'm getting burned out on working on this so I'm open to anyone wanting to help contribute to fixing up any bugs they find, etc.
-
-# Discord
-
-You can join the discord if you want to talk about the code here or suggest features / etc.
-
-[https://discord.gg/N2uEyp7Rfu](https://discord.gg/N2uEyp7Rfu)
-
-# Code Walkthrough (Early Access)
-
-For those wanting more hands on video walkthrough content that explains this code base, shows how to deploy it, and how to maintain it in production, I'm working on a paid video walkthrough series found here [https://webdevcody.gumroad.com/l/wdc-saas-starter-kit-walkthrough](https://webdevcody.gumroad.com/l/wdc-saas-starter-kit-walkthrough). I'm in the process of recording and editing videos, but if you purchase now it's 50% off the original pricing.
 
 # Welcome to the Starter Kit
 

@@ -10,7 +10,12 @@ export const protectedRoutes = ["/purchases", "/dashboard"];
 // The name comes from the brand tokens (brand/brand.json), the one place a
 // product sets it.
 export const applicationName = brand.productName;
-export const companyName = "Groupie, LLC";
+// The brand sheet has exactly four slots (product name, logo, colour, tone),
+// so the product's name stands in for the company's wherever a page names
+// who runs it (the legal pages). The starter hard-coded its own company
+// here, and every footer credited it; RapidBuild's scaffold story parked the
+// footer as a company credit no brand slot reaches (the GF-24 walk, F10).
+export const companyName = brand.productName;
 
 export const MAX_UPLOAD_IMAGE_SIZE_IN_MB = 5;
 export const MAX_UPLOAD_IMAGE_SIZE = 1024 * 1024 * MAX_UPLOAD_IMAGE_SIZE_IN_MB;

@@ -2,6 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { BRAND_SLOTS, brand, brandCss, derivePalettes, parseBrand, senderLine } from "@/brand";
 import tokens from "../brand/brand.json";
+import fs from "node:fs";
+import path from "node:path";
+import { applicationName, companyName } from "@/app-config";
 
 test("brand/brand.json has the four brand slots and no others", () => {
   assert.deepEqual(Object.keys(tokens).sort(), ["logo", "primary_color", "product_name", "tone"]);
@@ -33,4 +36,32 @@ test("the sender's name is the product's, in front of the deployment's address",
   assert.equal(senderLine("a@b.test", 'The "Best" app'), '"The \\"Best\\" app" <a@b.test>');
   // A whole from-line set at deployment is taken as written.
   assert.equal(senderLine("Support <s@b.test>", "Ledgerly"), "Support <s@b.test>");
+});
+
+test("the company is the product: one name, from the brand file", () => {
+  assert.equal(companyName, brand.productName);
+  assert.equal(applicationName, brand.productName);
+});
+
+// The starter's own names, domains and author, and the placeholder product
+// name, reach no page, email or public file: each one a builder's product
+// would have shipped (RapidBuild's GF-24 walk found two, F3 and F10, one
+// scaffold at a time). The placeholder name lives only in brand/brand.json.
+test("no starter name, domain or author is left where a product shows it", () => {
+  const residue = /groupie|group finder|groupfinder|wdc ?starter|webdevcody|your product|pizza hut|starterkit"/i;
+  const roots = ["src", "content", "public"];
+  const hits: string[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(file);
+      else if (/\.(tsx?|mdx?|json|xml|txt|html)$/.test(entry.name)) {
+        fs.readFileSync(file, "utf8").split("\n").forEach((line, i) => {
+          if (residue.test(line)) hits.push(`${file}:${i + 1}: ${line.trim()}`);
+        });
+      }
+    }
+  };
+  roots.forEach(walk);
+  assert.deepEqual(hits, []);
 });

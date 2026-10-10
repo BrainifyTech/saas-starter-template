@@ -1,6 +1,5 @@
 import { ModeToggle } from "@/components/mode-toggle";
-import { applicationName } from "@/app-config";
-import Image from "next/image";
+import { BrandMark } from "@/brand/brand-mark";
 import Link from "next/link";
 
 export function ComingSoonHeader() {
@@ -12,16 +11,9 @@ export function ComingSoonHeader() {
             href="/"
             className="hover:text-blue-100 flex gap-1 items-center"
           >
-            <Image
-              src="/group.jpeg"
-              width="60"
-              height="60"
-              alt="hero image"
-              className="rounded-full w-16 h-16 mr-4"
-            />
             <div className="flex flex-col">
               <div className="text-xs sm:text-xl">Coming Soon...</div>
-              <div className="text-lg sm:text-3xl">{applicationName}</div>
+              <BrandMark className="text-lg sm:text-3xl" />
             </div>
           </Link>
         </div>

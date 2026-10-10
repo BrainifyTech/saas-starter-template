@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ReactNode, Suspense } from "react";
 import { Providers } from "@/providers/providers";
 import { applicationName, appConfig } from "@/app-config";
+import { env } from "@/env";
 import PostHogPageView from "@/components/posthog-page-view";
 
 import { Archivo } from "next/font/google";
@@ -31,28 +32,19 @@ export const metadata: Metadata = {
   icons: [
     { rel: "icon", type: "image/png", sizes: "48x48", url: "/favicon.ico" },
   ],
-  keywords:
-    "community platform, group finder, meetup organizer, social groups, hobby groups, event scheduling, community building, find friends, interest groups, local communities, online communities, group chat, member management, private groups",
   description:
-    "Connect with like-minded people, join groups, and organize events. Group Finder makes it easy to build and grow your community.",
+    `Connect with like-minded people, join groups, and organize events. ${applicationName} makes it easy to build and grow your community.`,
   openGraph:
     mode === "comingSoon"
       ? {
-          title: "Group Finder - Build Your Community",
+          title: applicationName,
           description:
             "The easiest way to find your tribe and build meaningful connections.",
-          url: "https://groupfinder.app",
-          siteName: "Group Finder",
+          // The deployment's own address; the starter named its own domain
+          // and an og-image that was never in public/.
+          url: env.HOST_NAME,
+          siteName: applicationName,
           type: "website",
-          images: [
-            {
-              url: "https://groupfinder.app/og-image.png",
-              secureUrl: "https://groupfinder.app/og-image.png",
-              width: 1200,
-              height: 630,
-              alt: "Group Finder - Find Your People",
-            },
-          ],
         }
       : undefined,
 };

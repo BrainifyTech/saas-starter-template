@@ -59,6 +59,10 @@ export const env = createEnv({
     EMAIL_TRANSPORT: z.enum(["resend", "smtp", "log"]).optional(),
     STORAGE_ADAPTER: z.enum(["r2", "local"]).optional(),
     PAYMENTS_ADAPTER: z.enum(["stripe", "fake"]).optional(),
+    // The address the privacy page gives for questions. Optional: unset, it is
+    // the sender's address. Deployment's, like EMAIL_FROM; the starter wrote
+    // its author's own address into the page.
+    CONTACT_EMAIL: z.string().email().optional(),
     // Where STORAGE_ADAPTER=local keeps its files.
     MOCK_STORAGE_DIR: z.string().min(1).default(".data/storage"),
   },
@@ -98,9 +102,16 @@ export const env = createEnv({
     STORAGE_ADAPTER: process.env.STORAGE_ADAPTER,
     PAYMENTS_ADAPTER: process.env.PAYMENTS_ADAPTER,
     MOCK_STORAGE_DIR: process.env.MOCK_STORAGE_DIR,
+    CONTACT_EMAIL: process.env.CONTACT_EMAIL,
     NEXT_PUBLIC_CAPABILITY_MODE: process.env.NEXT_PUBLIC_CAPABILITY_MODE,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     NEXT_PUBLIC_STRIPE_MANAGE_URL: process.env.NEXT_PUBLIC_STRIPE_MANAGE_URL,
   },
 });
+
+// The address people write to: CONTACT_EMAIL, else the sender's address
+// (EMAIL_FROM after senderLine has put the name in front of it).
+export function contactEmail(): string {
+  return env.CONTACT_EMAIL ?? env.EMAIL_FROM.match(/<([^>]+)>\s*$/)?.[1] ?? env.EMAIL_FROM;
+}

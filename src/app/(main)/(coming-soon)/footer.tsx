@@ -1,10 +1,4 @@
 import { Lines } from "@/app/(main)/(coming-soon)/coming-soon";
-import {
-  DiscordIcon,
-  GithubIcon,
-  XIcon,
-  YoutubeIcon,
-} from "@/components/icons";
 import Link from "next/link";
 
 export function ComingSoonFooter() {
@@ -27,23 +21,6 @@ export function ComingSoonFooter() {
       <Lines />
 
       <div className="z-20 relative flex flex-col items-center gap-8">
-        <div className="text-xl text-neutral-900 dark:text-neutral-100">Follow for updates!</div>
-
-        <div className="flex justify-center gap-8">
-          <Link href="https://youtube.com/@webdevcody" target="_blank">
-            <YoutubeIcon className="w-10 h-10 hover:fill-neutral-600 dark:fill-neutral-200 dark:hover:fill-status-info" />
-          </Link>
-          <Link href="https://x.com/webdevcody" target="_blank">
-            <XIcon className="w-10 h-10 hover:fill-neutral-600 dark:fill-neutral-200 dark:hover:fill-status-info" />
-          </Link>
-          <Link href="https://github.com/webdevcody" target="_blank">
-            <GithubIcon className="w-10 h-10 hover:fill-neutral-600 dark:fill-neutral-200 dark:hover:fill-status-info" />
-          </Link>
-          <Link href="https://discord.gg/4kGbBaa" target="_blank">
-            <DiscordIcon className="w-10 h-10 hover:fill-neutral-600 dark:fill-neutral-200 dark:hover:fill-status-info" />
-          </Link>
-        </div>
-
         <div className="flex gap-8">
           <Link href="/privacy" className="hover:underline text-neutral-900 dark:text-neutral-100">
             Privacy Policy

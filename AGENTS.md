@@ -94,7 +94,10 @@ product sets: `product_name`, `logo` (`null`, or a file under `public/`
 such as `/brand/logo.svg`), `primary_color` (`#rrggbb`) and `tone` (one line
 describing how copy should sound). `src/brand/index.ts` reads them and
 derives the light and dark palettes from the one colour. Do not hard-code
-the product's name or colour anywhere else, and do not add a slot. When you
+the product's name or colour anywhere else, and do not add a slot. The
+product's name also stands in for the company's (`companyName` in
+`src/app-config.tsx`). Addresses are deployment's, not the brand's:
+`HOST_NAME`, `EMAIL_FROM` (the sender address) and `CONTACT_EMAIL`. When you
 write copy, follow `tone`.
 
 ## Where things are
