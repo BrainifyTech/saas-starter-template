@@ -10,6 +10,8 @@ import path from "node:path";
 
 const storageDir = fs.mkdtempSync(path.join(os.tmpdir(), "mock-storage-"));
 process.env.MOCK_STORAGE_DIR = storageDir;
+// The sender is asserted on its default, the brand name and the stand-in address.
+delete process.env.EMAIL_FROM;
 
 test("the declared set is exactly auth, email, storage, jobs, payments", async () => {
   const { CAPABILITY_NAMES, capabilities } = await import("@/capabilities");
@@ -38,6 +40,8 @@ test("email: a logged message lands in the outbox", async () => {
   assert.equal(mockOutbox().length, 1);
   assert.equal(mockOutbox()[0].to, "someone@example.test");
   assert.match(mockOutbox()[0].html, /Sign in/);
+  const { brand } = await import("@/brand");
+  assert.equal(mockOutbox()[0].from, `${brand.productName} <hello@example.test>`);
 });
 
 test("storage: a file put is read back, and a key cannot leave the directory", async () => {

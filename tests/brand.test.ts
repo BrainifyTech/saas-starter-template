@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { BRAND_SLOTS, brand, brandCss, derivePalettes, parseBrand } from "@/brand";
+import { BRAND_SLOTS, brand, brandCss, derivePalettes, parseBrand, senderLine } from "@/brand";
 import tokens from "../brand/brand.json";
 
 test("brand/brand.json has the four brand slots and no others", () => {
@@ -23,4 +23,14 @@ test("light and dark palettes are derived from the one colour", () => {
   // A pale brand colour still yields a fill white text can sit on.
   assert.ok(lightness(derivePalettes("#fde68a").light.primary) <= 55);
   assert.match(brandCss(), /^:root\{--primary:[^}]+\}\.dark\{--primary:[^}]+\}$/);
+});
+
+test("the sender's name is the product's, in front of the deployment's address", () => {
+  assert.equal(senderLine("hello@example.test"), `${brand.productName} <hello@example.test>`);
+  assert.equal(senderLine(" mail@ledgerly.app ", "Ledgerly"), "Ledgerly <mail@ledgerly.app>");
+  // A name with a comma or a quote is quoted, or it reads as two recipients.
+  assert.equal(senderLine("a@b.test", "Acme, Inc"), '"Acme, Inc" <a@b.test>');
+  assert.equal(senderLine("a@b.test", 'The "Best" app'), '"The \\"Best\\" app" <a@b.test>');
+  // A whole from-line set at deployment is taken as written.
+  assert.equal(senderLine("Support <s@b.test>", "Ledgerly"), "Support <s@b.test>");
 });

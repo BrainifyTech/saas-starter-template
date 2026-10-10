@@ -108,7 +108,7 @@ This starter kit depends on a few external services, such as **google oauth**, *
 
 Create an account on https://resend.com/ and generate an api key and paste into **EMAIL_SERVER_PASSWORD**
 
-Setup your domain in resend so that you can send emails from your custom domain and set **EMAIL_FROM** to match your expected from line. To do this, go to your domain provider and add the necessary records outlined in resend.
+Setup your domain in resend so that you can send emails from your custom domain and set **EMAIL_FROM** to the sending address on that domain (the address only: the name in front of it is `product_name` from `brand/brand.json`). To do this, go to your domain provider and add the necessary records outlined in resend.
 
 ## Cloudflare R2
 

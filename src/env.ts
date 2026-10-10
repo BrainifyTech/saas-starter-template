@@ -1,5 +1,6 @@
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
+import { senderLine } from "@/brand";
 
 // Capability mode decides whether email, storage, payments, jobs and the OAuth
 // half of auth reach real providers ("live") or the local mocks in
@@ -37,7 +38,9 @@ export const env = createEnv({
     GITHUB_CLIENT_SECRET: provider("mock-github-client-secret"),
     STRIPE_API_KEY: provider("sk_test_mock"),
     STRIPE_WEBHOOK_SECRET: provider("whsec_mock"),
-    EMAIL_FROM: provider("Your product <hello@example.test>"),
+    // The sender's address only, set at deployment; the display name in front
+    // of it is brand/brand.json's product_name (senderLine in src/brand).
+    EMAIL_FROM: provider("hello@example.test").transform((from) => senderLine(from)),
     EMAIL_SERVER_HOST: provider("localhost"),
     EMAIL_SERVER_PORT: provider("1025"),
     EMAIL_SERVER_USER: provider("mock"),

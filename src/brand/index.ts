@@ -63,6 +63,30 @@ export function parseBrand(raw: unknown): Brand {
 
 export const brand: Brand = parseBrand(tokens);
 
+// ---- the mail sender -------------------------------------------------------
+
+// Mail reads as coming from the product, so the sender's display name is
+// product_name. The address is deployment's: it has to be on a domain the mail
+// provider has verified, which no brand question can answer, so EMAIL_FROM
+// carries only the address (src/env.ts) and this puts the name in front of it.
+// EMAIL_FROM used to default to a whole "Name <address>" line with the
+// placeholder name written into it, and RapidBuild's first scaffold story
+// (the GF-24 walk, F3, 2026-10-09) parked src/env.ts and src/lib/send-email.tsx
+// as a second place the name lived, which cost the plan its standing approval.
+//
+// A full "Name <address>" line set at deployment is taken as written: whoever
+// set it chose that name on purpose.
+export function senderLine(from: string, productName: string = brand.productName): string {
+  const value = from.trim();
+  if (value.includes("<")) return value;
+  // RFC 5322: a display name holding any of these must be a quoted string, or
+  // "Acme, Inc <a@b>" parses as two recipients.
+  const name = /[()<>[\]:;@\\,."]/.test(productName)
+    ? `"${productName.replace(/["\\]/g, "\\$&")}"`
+    : productName;
+  return `${name} <${value}>`;
+}
+
 // ---- palette derivation ---------------------------------------------------
 
 type Hsl = { h: number; s: number; l: number };
