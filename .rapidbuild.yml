@@ -25,14 +25,23 @@ setup: npm run postinstall --if-present
 # (a new required prop, a renamed export) fails here, not in production.
 lint: npm run lint
 
-# The preset's test command: migrate, seed, and a record saved and found
-# again through the app's own data-access functions (rb-db-smoke.ts).
-# `npm run test` starts with exactly this and then runs the rest of tests/.
-test: npm run db:migrate && npm run db:seed && npx tsx rb-db-smoke.ts
+# CI's own test step: migrate, seed, a record saved and found again through
+# the app's own data-access functions (rb-db-smoke.ts), and then every unit
+# test under tests/. Until v1.0.4 this line was the first three alone, so a
+# run's check skipped the unit tests CI runs and one that failed only in CI
+# shipped after a green check (RapidBuild GF-37 walk, finding A6).
+test: npm test
+
+# There is no key here for `npm run db:check` (drizzle-kit check, then
+# scripts/check-migration-heads.mjs). CI runs it on every PR, and on a
+# project created from the preset the run's check runs it after test, from
+# the preset's migrations.heads_check; no reader of this file takes it.
 
 # Every capability but the database runs on its local mock unless
 # NEXT_PUBLIC_CAPABILITY_MODE=live, so DATABASE_URL is the only value a
-# preview needs.
+# preview needs. The preset declares migrate and start (`npm run dev`)
+# separately; this file has no migrate key, so its preview line migrates
+# first, and differing from the preset here is on purpose.
 preview_command: npm run db:migrate && npm run dev
 preview_port: 3000
 
